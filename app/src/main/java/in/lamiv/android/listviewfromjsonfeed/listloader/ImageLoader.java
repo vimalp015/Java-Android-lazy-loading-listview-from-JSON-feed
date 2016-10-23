@@ -21,6 +21,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -33,6 +34,10 @@ import in.lamiv.android.listviewfromjsonfeed.helpers.Utils;
 
 /**
  * Created by vimal on 10/23/2016.
+ * This class loads the images to the list view by looking into cache and disk, if not found
+ * it will fetch from internet and will load the image.
+ * The code makes sure that we do not hold any references to the components of UI thread
+ * while we spawn a new thread for disk or network access, to avoid any memory leakage
  */
 
 public class ImageLoader {
@@ -57,26 +62,32 @@ public class ImageLoader {
         executorService = Executors.newFixedThreadPool(DEFAULT_NO_OF_THREADS);
     }
 
-    public void displayImage(String url, ImageView imageView, TextView textView) {
+    public void displayImage(String url, ImageView _imageView, TextView _textView) {
 
-        imageViews.put(imageView, url);
+        imageViews.put(_imageView, url);
+        WeakReference<ImageView> imageViewWeakReference = new WeakReference<ImageView>(_imageView);
+        WeakReference<TextView> textViewWeakReference = new WeakReference<TextView>(_textView);
 
         Bitmap bitmap = memoryCache.get(url);
 
-        if(bitmap != null) {
-            imageView.setVisibility(View.VISIBLE);
-            imageView.setImageBitmap(bitmap);
-            if(!textView.getText().toString().equals("")) {
-                SpannableString ss = new SpannableString(textView.getText().toString());
-                int width = imageView.getLayoutParams().width + 40; //add 40px as padding space for 6 rows
-                ss.setSpan(new TextMarginSpan(6, width), 1, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                textView.setText(ss);
-            }
-        } else {
-            queuePhoto(url, imageView, textView);
+        ImageView imageView = imageViewWeakReference.get();
+        TextView textView = textViewWeakReference.get();
+        if(imageView != null && textView != null) {
+            if (bitmap != null) {
+                imageView.setVisibility(View.VISIBLE);
+                imageView.setImageBitmap(bitmap);
+                if (!textView.getText().toString().equals("")) {
+                    SpannableString ss = new SpannableString(textView.getText().toString());
+                    int width = imageView.getLayoutParams().width + 40; //add 40px as padding space for 6 rows
+                    ss.setSpan(new TextMarginSpan(6, width), 1, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    textView.setText(ss);
+                }
+            } else {
+                queuePhoto(url, imageView, textView);
 
-            imageView.setVisibility(View.GONE);
-            textView.setText(textView.getText().toString());
+                imageView.setVisibility(View.GONE);
+                textView.setText(textView.getText().toString());
+            }
         }
     }
 
@@ -89,12 +100,12 @@ public class ImageLoader {
 
     private class PhotoToLoad {
         public String url;
-        public ImageView imageView;
-        public TextView textView;
+        public WeakReference<ImageView> imageView;
+        public WeakReference<TextView> textView;
         public PhotoToLoad(String u, ImageView i, TextView t) {
             url = u;
-            imageView = i;
-            textView = t;
+            imageView = new WeakReference<ImageView>(i);
+            textView = new WeakReference<TextView>(t);
         }
     }
 
@@ -218,7 +229,7 @@ public class ImageLoader {
 
     boolean imageViewReused(PhotoToLoad ptl) {
 
-        String tag = imageViews.get(ptl.imageView);
+        String tag = imageViews.get(ptl.imageView.get());
 
         if(tag == null || !tag.equals(ptl.url))
             return true;
@@ -239,20 +250,24 @@ public class ImageLoader {
             if(imageViewReused(photoToLoad))
                 return;
 
-            if(bitmap != null) {
-                photoToLoad.imageView.setVisibility(View.VISIBLE);
-                photoToLoad.imageView.setImageBitmap(bitmap);
+            ImageView imageView = photoToLoad.imageView.get();
+            TextView textView = photoToLoad.textView.get();
+            if(imageView != null && textView != null) {
+                if (bitmap != null) {
+                    imageView.setVisibility(View.VISIBLE);
+                    imageView.setImageBitmap(bitmap);
 
-                if(!photoToLoad.textView.getText().toString().equals("")) {
-                    SpannableString ss = new SpannableString(photoToLoad.textView.getText().toString());
-                    int width = photoToLoad.imageView.getLayoutParams().width + 40; //add 40px as padding space for 6 rows
-                    ss.setSpan(new TextMarginSpan(6, width), 1, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    photoToLoad.textView.setText(ss);
+                    if (!textView.getText().toString().equals("")) {
+                        SpannableString ss = new SpannableString(textView.getText().toString());
+                        int width = imageView.getLayoutParams().width + 40; //add 40px as padding space for 6 rows
+                        ss.setSpan(new TextMarginSpan(6, width), 1, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        textView.setText(ss);
+                    }
+
+                } else {
+                    imageView.setVisibility(View.GONE);
+                    textView.setText(textView.getText().toString());
                 }
-
-            } else {
-                photoToLoad.imageView.setVisibility(View.GONE);
-                photoToLoad.textView.setText(photoToLoad.textView.getText().toString());
             }
         }
     }

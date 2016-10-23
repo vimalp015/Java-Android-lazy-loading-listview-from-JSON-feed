@@ -2,8 +2,6 @@ package in.lamiv.android.listviewfromjsonfeed.listloader;
 
 import android.app.Activity;
 import android.content.Context;
-import android.text.SpannableString;
-import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,10 +14,11 @@ import java.util.Iterator;
 
 import in.lamiv.android.listviewfromjsonfeed.R;
 import in.lamiv.android.listviewfromjsonfeed.helpers.JSONFeed;
-import in.lamiv.android.listviewfromjsonfeed.helpers.TextMarginSpan;
 
 /**
  * Created by vimal on 10/23/2016.
+ * Adapter extention to load the JSON feed to listview and queue image loading
+ * to ImageLoader class
  */
 
 public class LazyLoadAdapter extends BaseAdapter implements View.OnClickListener {
