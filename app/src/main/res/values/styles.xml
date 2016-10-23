@@ -8,4 +8,50 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="buttonStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="listViewStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
+    <style name="listItemImageStyle">
+        <item name="android:foregroundGravity">right</item>
+        <item name="android:scaleType">centerCrop</item>
+        <item name="android:layout_width">@dimen/list_item_image_layout_width</item>
+        <item name="android:layout_height">@dimen/list_item_image_layout_height</item>
+        <item name="android:layout_gravity">top|right</item>
+        <item name="android:layout_alignParentRight">true</item>
+        <item name="android:layout_marginBottom">@dimen/list_item_image_layout_margin_bottom</item>
+        <item name="android:layout_marginRight">@dimen/list_item_image_layout_margin_right</item>
+    </style>
+
+    <style name="rowDescriptionStyle">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_gravity">left|center_vertical</item>
+        <item name="android:textSize">@dimen/list_item_description_text_size</item>
+        <item name="android:layout_marginLeft">@dimen/list_item_description_margin_left</item>
+        <item name="android:layout_marginRight">@dimen/list_item_description_margin_right</item>
+        <item name="android:layout_marginTop">@dimen/list_item_description_margin_top</item>
+        <item name="android:textColor">@color/colorBlack</item>
+        <item name="android:gravity">left</item>
+        <item name="android:layout_marginBottom">@dimen/list_item_description_margin_bottom</item>
+        <item name="android:layout_alignParentLeft">true</item>
+    </style>
+
+    <style name="rowHeaderStyle">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_gravity">left|center_vertical</item>
+        <item name="android:textSize">@dimen/list_item_header_text_size</item>
+        <item name="android:layout_marginLeft">@dimen/list_item_header_margin_left</item>
+        <item name="android:layout_marginTop">@dimen/list_item_header_margin_top</item>
+        <item name="android:textColor">@color/colorHeader</item>
+        <item name="android:layout_alignParentLeft">true</item>
+    </style>
 </resources>

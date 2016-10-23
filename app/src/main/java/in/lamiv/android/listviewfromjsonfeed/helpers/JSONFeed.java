@@ -5,6 +5,8 @@ import java.util.List;
 
 /**
  * Created by vimal on 10/23/2016.
+ * This is the Seriaizer and DeSerializer class for JSON feed we receive from the service
+ * Any changes in the property names must sync with the JSON response from the server
  */
 
 public class JSONFeed {

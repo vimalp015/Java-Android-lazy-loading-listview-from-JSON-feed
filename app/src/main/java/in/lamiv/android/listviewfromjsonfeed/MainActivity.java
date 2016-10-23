@@ -29,10 +29,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         MainActivity.this.setTitle(GlobalVars.LIST_LOADING_MESSAGE);
+
         LoadItems();
         Button b = (Button) findViewById(R.id.buttonRefresh);
+        b.setOnClickListener(listener);
     }
 
     public void LoadItems() {
@@ -65,6 +66,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
+            MainActivity.this.setTitle(GlobalVars.LIST_LOADING_MESSAGE);
+            adapter.imageLoader.clearCache();
             list.setAdapter(null);
             LoadItems();
         }

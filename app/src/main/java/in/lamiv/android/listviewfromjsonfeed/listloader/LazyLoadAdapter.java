@@ -2,6 +2,8 @@ package in.lamiv.android.listviewfromjsonfeed.listloader;
 
 import android.app.Activity;
 import android.content.Context;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +16,7 @@ import java.util.Iterator;
 
 import in.lamiv.android.listviewfromjsonfeed.R;
 import in.lamiv.android.listviewfromjsonfeed.helpers.JSONFeed;
+import in.lamiv.android.listviewfromjsonfeed.helpers.TextMarginSpan;
 
 /**
  * Created by vimal on 10/23/2016.
@@ -23,6 +26,7 @@ public class LazyLoadAdapter extends BaseAdapter implements View.OnClickListener
 
     private final WeakReference<Activity> activity;
     private static LayoutInflater inflater = null;
+    public ImageLoader imageLoader;
     private static JSONFeed jsonFeed;
 
     public LazyLoadAdapter(Activity _activity, JSONFeed _jsonFeed) {
@@ -32,9 +36,9 @@ public class LazyLoadAdapter extends BaseAdapter implements View.OnClickListener
         Iterator<JSONFeed.Row> rowIterator = _jsonFeed.getRows().iterator();
         while(rowIterator.hasNext()) {
             JSONFeed.Row row = rowIterator.next();
-            if((row.getTitle() == null || row.getTitle() == "")
-                    && (row.getDescription() == null || row.getDescription() == "")
-                    && (row.getImageHref() == null || row.getImageHref() == "")) {
+            if((row.getTitle() == null || row.getTitle().equals(""))
+                    && (row.getDescription() == null || row.getDescription().equals(""))
+                    && (row.getImageHref() == null || row.getImageHref().equals(""))) {
                 rowIterator.remove();
             }
         }
@@ -43,6 +47,7 @@ public class LazyLoadAdapter extends BaseAdapter implements View.OnClickListener
         Activity activityRef = activity.get();
         if(activityRef != null) {
             inflater = (LayoutInflater) activityRef.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            imageLoader = new ImageLoader(activityRef.getApplicationContext());
         }
     }
 
@@ -90,6 +95,8 @@ public class LazyLoadAdapter extends BaseAdapter implements View.OnClickListener
 
         holder.topicHeading.setText(jsonFeed.getRows().get(pos).getTitle());
         holder.topicDescription.setText(jsonFeed.getRows().get(pos).getDescription());
+        imageLoader.displayImage(jsonFeed.getRows().get(pos).getImageHref(),
+                holder.topicImage, holder.topicDescription);
 
         return vi;
     }

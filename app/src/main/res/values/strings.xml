@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">ListView From JSON Feed</string>
+    <string name="app_name">Pactera</string>
+    <string name="button_refresh_text">Refresh</string>
 </resources>
