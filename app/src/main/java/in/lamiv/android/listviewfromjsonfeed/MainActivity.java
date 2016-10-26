@@ -1,5 +1,6 @@
 package in.lamiv.android.listviewfromjsonfeed;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -12,6 +13,8 @@ import com.google.gson.GsonBuilder;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONObject;
+
+import java.lang.ref.WeakReference;
 
 import cz.msebera.android.httpclient.Header;
 import in.lamiv.android.listviewfromjsonfeed.helpers.GlobalVars;
@@ -31,21 +34,25 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         MainActivity.this.setTitle(GlobalVars.LIST_LOADING_MESSAGE);
 
-        LoadItems();
+        loadItems(MainActivity.this);
         Button b = (Button) findViewById(R.id.buttonRefresh);
         b.setOnClickListener(listener);
     }
 
-    public void LoadItems() {
+    public void loadItems(Activity _activity) {
+        final WeakReference<Activity> activityWeakReference = new WeakReference<Activity>(_activity);
         RestClient.get(null, null, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                Gson gson = new GsonBuilder().create();
-                JSONFeed jsonFeed = gson.fromJson(response.toString(), JSONFeed.class);
-                MainActivity.this.setTitle(jsonFeed.getTitle());
-                adapter = new LazyLoadAdapter(MainActivity.this, jsonFeed);
-                list = (ListView) findViewById(R.id.list);
-                list.setAdapter(adapter);
+                Activity activity = activityWeakReference.get();
+                if(activity != null) {
+                    Gson gson = new GsonBuilder().create();
+                    JSONFeed jsonFeed = gson.fromJson(response.toString(), JSONFeed.class);
+                    MainActivity.this.setTitle(jsonFeed.getTitle());
+                    adapter = new LazyLoadAdapter(MainActivity.this, jsonFeed);
+                    list = (ListView) findViewById(R.id.list);
+                    list.setAdapter(adapter);
+                }
             }
 
             @Override
@@ -69,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
             MainActivity.this.setTitle(GlobalVars.LIST_LOADING_MESSAGE);
             adapter.imageLoader.clearCache();
             list.setAdapter(null);
-            LoadItems();
+            loadItems(MainActivity.this);
         }
     };
 }
