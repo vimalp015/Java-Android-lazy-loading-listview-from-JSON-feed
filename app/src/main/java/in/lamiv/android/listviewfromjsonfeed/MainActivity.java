@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
                     JSONFeed jsonFeed = gson.fromJson(response.toString(), JSONFeed.class);
                     activity.setTitle(jsonFeed.getTitle());
                     adapter = new LazyLoadAdapter(activity, jsonFeed);
-                    list = (ListView) findViewById(R.id.list);
+                    list = (ListView) activity.findViewById(R.id.list);
                     list.setAdapter(adapter);
                 }
             }
