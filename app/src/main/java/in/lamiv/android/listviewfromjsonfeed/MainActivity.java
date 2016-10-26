@@ -48,8 +48,8 @@ public class MainActivity extends AppCompatActivity {
                 if(activity != null) {
                     Gson gson = new GsonBuilder().create();
                     JSONFeed jsonFeed = gson.fromJson(response.toString(), JSONFeed.class);
-                    MainActivity.this.setTitle(jsonFeed.getTitle());
-                    adapter = new LazyLoadAdapter(MainActivity.this, jsonFeed);
+                    activity.setTitle(jsonFeed.getTitle());
+                    adapter = new LazyLoadAdapter(activity, jsonFeed);
                     list = (ListView) findViewById(R.id.list);
                     list.setAdapter(adapter);
                 }
