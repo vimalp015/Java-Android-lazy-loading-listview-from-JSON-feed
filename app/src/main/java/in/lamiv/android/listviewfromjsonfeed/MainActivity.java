@@ -1,6 +1,5 @@
 package in.lamiv.android.listviewfromjsonfeed;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -27,39 +26,67 @@ public class MainActivity extends AppCompatActivity {
 
     ListView list;
     LazyLoadAdapter adapter;
+    LoadItemsCallback callbackDelegate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        MainActivity.this.setTitle(GlobalVars.LIST_LOADING_MESSAGE);
+        this.setTitle(GlobalVars.LIST_LOADING_MESSAGE);
+        callbackDelegate = new LoadItemsCallback() {
+            @Override
+            public void onDownloadFinishedCallback(JSONObject jsonObject) {
+                onDownloadFinished(jsonObject);
+            }
+        };
+        LoadItemsClass.loadItems(callbackDelegate);
 
-        loadItems(MainActivity.this);
         Button b = (Button) findViewById(R.id.buttonRefresh);
         b.setOnClickListener(listener);
     }
 
-    public void loadItems(Activity _activity) {
-        final WeakReference<Activity> activityWeakReference = new WeakReference<Activity>(_activity);
-        RestClient.get(null, null, new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                Activity activity = activityWeakReference.get();
-                if(activity != null) {
-                    Gson gson = new GsonBuilder().create();
-                    JSONFeed jsonFeed = gson.fromJson(response.toString(), JSONFeed.class);
-                    activity.setTitle(jsonFeed.getTitle());
-                    adapter = new LazyLoadAdapter(activity, jsonFeed);
-                    list = (ListView) activity.findViewById(R.id.list);
-                    list.setAdapter(adapter);
-                }
-            }
+    //callback interface with onDownloadFinished option,
+    // you can further add onFailure and other scenario
+    interface LoadItemsCallback {
+        void onDownloadFinishedCallback(JSONObject jsonObject);
+    }
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                super.onFailure(statusCode, headers, responseString, throwable);
-            }
-        });
+    //callback (delegate) function that will be executed on
+    // downloading of JSON data from server
+    private void onDownloadFinished(JSONObject jsonObject){
+        Gson gson = new GsonBuilder().create();
+        JSONFeed jsonFeed = gson.fromJson(jsonObject.toString(), JSONFeed.class);
+        this.setTitle(jsonFeed.getTitle());
+        adapter = new LazyLoadAdapter(this.getApplicationContext(), jsonFeed);
+        list = (ListView) this.findViewById(R.id.list);
+        list.setAdapter(adapter);
+    }
+
+    //Static class in Java will not hold a reference to parent class
+    //hence loosely coupled and thereby avoiding accidental memory leak
+    private static class LoadItemsClass {
+
+        public static void loadItems(LoadItemsCallback _loadItemsCallback) {
+
+            //always pass weakreference to threads that might outlive your activity
+            final WeakReference<LoadItemsCallback> loadItemsCallbackWeakReference =
+                    new WeakReference<LoadItemsCallback>(_loadItemsCallback);
+
+            RestClient.get(null, null, new JsonHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    LoadItemsCallback loadItemsCallback = loadItemsCallbackWeakReference.get();
+                    if (loadItemsCallback != null) {
+                        loadItemsCallback.onDownloadFinishedCallback(response);
+                    }
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                    super.onFailure(statusCode, headers, responseString, throwable);
+                }
+            });
+        }
     }
 
     @Override
@@ -76,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
             MainActivity.this.setTitle(GlobalVars.LIST_LOADING_MESSAGE);
             adapter.imageLoader.clearCache();
             list.setAdapter(null);
-            loadItems(MainActivity.this);
+            LoadItemsClass.loadItems(callbackDelegate);
         }
     };
 }
