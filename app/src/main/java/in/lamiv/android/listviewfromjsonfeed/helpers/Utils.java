@@ -5,7 +5,7 @@ import java.io.OutputStream;
 
 /**
  * Created by vimal on 10/23/2016.
- * Will contain all the util methods like copyStream, date formatting etc. used in the project
+ * Will contain all the util methods like copyStream, date formatting etc. used in this project
  */
 
 public class Utils {

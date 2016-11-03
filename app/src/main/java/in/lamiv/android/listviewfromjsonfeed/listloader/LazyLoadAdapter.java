@@ -1,6 +1,5 @@
 package in.lamiv.android.listviewfromjsonfeed.listloader;
 
-import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,13 +22,13 @@ import in.lamiv.android.listviewfromjsonfeed.helpers.JSONFeed;
 
 public class LazyLoadAdapter extends BaseAdapter implements View.OnClickListener {
 
-    private final WeakReference<Activity> activity;
+    private final WeakReference<Context> contextWeakReference;
     private static LayoutInflater inflater = null;
     public ImageLoader imageLoader;
     private static JSONFeed jsonFeed;
 
-    public LazyLoadAdapter(Activity _activity, JSONFeed _jsonFeed) {
-        activity = new WeakReference<Activity>(_activity);
+    public LazyLoadAdapter(Context _context, JSONFeed _jsonFeed) {
+        contextWeakReference = new WeakReference<Context>(_context);
 
         //Remove rows with all null values
         Iterator<JSONFeed.Row> rowIterator = _jsonFeed.getRows().iterator();
@@ -42,11 +41,11 @@ public class LazyLoadAdapter extends BaseAdapter implements View.OnClickListener
             }
         }
 
-        this.jsonFeed = _jsonFeed;
-        Activity activityRef = activity.get();
-        if(activityRef != null) {
-            inflater = (LayoutInflater) activityRef.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            imageLoader = new ImageLoader(activityRef.getApplicationContext());
+        jsonFeed = _jsonFeed;
+        Context contextRef = contextWeakReference.get();
+        if(contextRef != null) {
+            inflater = (LayoutInflater) contextRef.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            imageLoader = new ImageLoader(contextRef);
         }
     }
 
